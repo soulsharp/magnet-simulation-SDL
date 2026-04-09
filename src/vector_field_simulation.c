@@ -1,6 +1,7 @@
 #define SDL_MAIN_USE_CALLBACKS 1
 #include <stdio.h>
 #include <SDL3/SDL.h>
+#include <math.h>
 #include "utils.h"
 
 #define STEP_RATE_IN_MILLISECONDS  125
@@ -49,21 +50,33 @@ int* get_grid_pos(bool forX, int *grid_pos){
     return grid_pos;
 }
 
-void initialize_grid(GridSystem* grid_context){
+GridSystem* initialize_grid(GridSystem* grid_context){
     // Define X positions and Y positions
-    int i, force_x_component, force_y_component;
+    int i, force, direction;
     int x_step = SIMULATION_WIDTH / GRID_SIZE;
     int y_step = SIMULATION_HEIGHT / GRID_SIZE;
+    int num_grids = x_step * y_step;
     int grid_x[x_step];
-    int grid_y[y_step]; 
-    grid_context -> x = get_grid_pos(true , grid_x);
-    grid_context -> y = get_grid_pos(false, grid_y);
+    int grid_y[y_step];
+    int force_x[x_step * y_step];
+    int force_y[x_step * y_step]; 
 
     // Initialize the force field
-    for (i=0, i<x_step*y_step; i++){
-        force_x_component = generate_random_force(MAX_FORCE)
+    for (i=0; i<num_grids; i++){
+        force = generate_random_force(MAX_FORCE);
+        direction = generate_random_direction();
 
+        force_x[i] = force * cos(direction);
+        force_y[i] = force * sin(direction);
     }
+    
+    grid_context -> x = get_grid_pos(true , grid_x);
+    grid_context -> y = get_grid_pos(false, grid_y);
+    grid_context -> fx = force_x;
+    grid_context -> fy = force_y;
+    grid_context -> num_grids = num_grids;
+
+    return grid_context;
 }
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
